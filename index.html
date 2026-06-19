@@ -606,15 +606,36 @@
   reveals.forEach(el => observer.observe(el));
 
   // Form
-  function handleSubmit() {
-    const email = document.getElementById('email-input').value;
+  async function handleSubmit() {
+    const input = document.getElementById('email-input');
+    const btn = document.querySelector('.form-row button');
+    const email = input.value.trim();
     if (!email || !email.includes('@')) {
       alert('Please enter a valid email address.');
       return;
     }
-    // Connect to Beehiiv here
-    alert('Welcome to Iron & Order. Check your inbox.');
-    document.getElementById('email-input').value = '';
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    try {
+      const res = await fetch('/.netlify/functions/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        btn.textContent = 'Claimed';
+        input.value = '';
+        document.querySelector('.form-note').textContent = 'You\'re in. Check your inbox.';
+      } else {
+        btn.textContent = 'Claim It';
+        btn.disabled = false;
+        alert('Something went wrong. Please try again.');
+      }
+    } catch {
+      btn.textContent = 'Claim It';
+      btn.disabled = false;
+      alert('Something went wrong. Please try again.');
+    }
   }
 </script>
 </body>
